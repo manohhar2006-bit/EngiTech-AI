@@ -1,0 +1,39 @@
+{
+  "name": "engitrace-backend",
+  "version": "0.2.0",
+  "private": true,
+  "description": "EngiTrace Backend API Gateway and Ingestion Orchestrator",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "test": "tsx tests/ingestion.test.ts && tsx tests/graph.test.ts && tsx tests/whyExplorer.test.ts && tsx tests/aiReasoning.test.ts && tsx src/__tests__/decisionDebt.test.ts && tsx src/__tests__/impactAnalysis.test.ts && tsx tests/chatController.test.ts && tsx tests/chatRetriesAndFallback.test.ts && tsx tests/chatValidationAndEvidence.test.ts && tsx tests/dependencyExtraction.test.ts && tsx tests/astAnalyzer.test.ts && tsx tests/part2GraphAndIngestion.test.ts && tsx tests/multiFileChatRetrieval.test.ts && tsx tests/task6IntelligenceImprovements.test.ts",
+    "test:task6": "tsx tests/task6IntelligenceImprovements.test.ts",
+    "test:eeid:seeder": "tsx tests/seed_eeid_questions.test.ts",
+    "test:eeid:validator": "tsx tests/validate_eeid_record.test.ts",
+    "test:eeid:annotation": "tsx tests/prepare_eeid_annotation.test.ts",
+    "test:eeid:evaluator": "tsx tests/evaluate_eeid.test.ts",
+    "eeid:evaluate": "tsx ../run_eeid_evaluation.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.7.4",
+    "fast-xml-parser": "^5.12.0",
+    "helmet": "^8.3.0",
+    "smol-toml": "^1.9.1",
+    "tree-sitter-wasms": "^0.1.13",
+    "web-tree-sitter": "^0.22.6",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.0",
+    "tsx": "^4.23.12",
+    "typescript": "^5.4.0"
+  }
+}

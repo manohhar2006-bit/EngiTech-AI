@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EngiTrace Session Seeder</title>
+</head>
+<body style="background:#070A12;color:#fff;font-family:sans-serif;">
+  <div style="padding:40px;text-align:center;">
+    <h2>Seeding EngiTrace AI Investigation Sessions...</h2>
+  </div>
+  <script>
+    const session1 = {
+      id: "inv-react-fiber-01",
+      repositoryId: "repo-facebook-react",
+      repositoryName: "facebook/react",
+      targetNodeId: "file:repo-facebook-react:packages/react/src/ReactFiberRoot.js",
+      targetNodeLabel: "ReactFiberRoot.js",
+      targetNodeType: "FILE",
+      targetFilePath: "packages/react/src/ReactFiberRoot.js",
+      investigationMode: "WHY",
+      investigationTopic: "Why does ReactFiberRoot.js exist?",
+      messages: [
+        {
+          id: "u-1",
+          role: "user",
+          content: "Why does ReactFiberRoot.js exist?",
+          timestamp: "2026-11-10T22:30:00.000Z"
+        },
+        {
+          id: "a-1",
+          role: "assistant",
+          content: "ReactFiberRoot represents the root of a fiber tree hierarchy. It manages the work-in-progress tree, current tree swap, container DOM nodes, and scheduler priority queues.",
+          timestamp: "2026-11-10T22:30:03.000Z",
+          claims: [
+            { text: "Contains current and workInProgress Fiber nodes", classification: "FACT", confidence: 0.98 },
+            { text: "Created via createFiberRoot during ReactDOM.createRoot initialization", classification: "FACT", confidence: 0.94 }
+          ],
+          suggestedFollowUps: [
+            "Which commit changed ReactFiberRoot.js?",
+            "What downstream components depend on ReactFiberRoot.js?"
+          ],
+          provider: "GEMINI_CHAT",
+          model: "gemini-3.6-flash"
+        },
+        {
+          id: "u-2",
+          role: "user",
+          content: "Which commit modified ReactFiberRoot.js?",
+          timestamp: "2026-11-10T22:31:00.000Z"
+        },
+        {
+          id: "a-2",
+          role: "assistant",
+          content: "Commit 8af42d91 by Sophie Alpert (2024-11-15) refactored fiber reconciliation and separated expiration times into lanes.",
+          timestamp: "2026-11-10T22:31:04.000Z",
+          claims: [
+            { text: "Commit 8af42d91 introduced concurrent mode lane priority bitmasks", classification: "FACT", confidence: 0.96 }
+          ],
+          suggestedFollowUps: [
+            "What happens if ReactFiberRoot.js is removed?",
+            "Inspect downstream callers in packages/react-reconciler"
+          ],
+          provider: "GEMINI_CHAT",
+          model: "gemini-3.6-flash"
+        }
+      ],
+      suggestedQuestions: [
+        "What happens if ReactFiberRoot.js is removed?",
+        "Inspect downstream callers in packages/react-reconciler"
+      ],
+      originContext: {
+        repoId: "repo-facebook-react",
+        repoName: "facebook/react",
+        view: "architecture",
+        nodeId: "file:repo-facebook-react:packages/react/src/ReactFiberRoot.js",
+        timestamp: Date.now()
+      },
+      createdAt: "2026-11-10T22:30:00.000Z",
+      updatedAt: "2026-11-10T22:31:04.000Z",
+      status: "active"
+    };
+
+    const session2 = {
+      id: "inv-payment-02",
+      repositoryId: "repo-payment-gateway",
+      repositoryName: "codeorigin/payment-gateway",
+      targetNodeId: "file:repo-payment-gateway:src/services/PaymentService.ts",
+      targetNodeLabel: "PaymentService.ts",
+      targetNodeType: "FILE",
+      investigationMode: "WHAT_IF",
+      investigationTopic: "What happens if PaymentService.ts is removed?",
+      messages: [
+        {
+          id: "u-p1",
+          role: "user",
+          content: "What happens if PaymentService.ts is removed?",
+          timestamp: "2026-11-10T21:00:00.000Z"
+        },
+        {
+          id: "a-p1",
+          role: "assistant",
+          content: "Impact Level is CRITICAL (Score: 88/100). Removing PaymentService breaks transaction verification and checkout routing.",
+          timestamp: "2026-11-10T21:00:03.000Z",
+          claims: [
+            { text: "Direct dependents: CheckoutController.ts, SubscriptionService.ts", classification: "FACT", confidence: 0.95 }
+          ]
+        }
+      ],
+      createdAt: "2026-11-10T21:00:00.000Z",
+      updatedAt: "2026-11-10T21:00:03.000Z",
+      status: "active"
+    };
+
+    sessionStorage.setItem("engitrace.ai.sessions.v1", JSON.stringify([session1, session2]));
+    sessionStorage.setItem("engitrace.ai.active_session_id.v1", "inv-react-fiber-01");
+    sessionStorage.setItem("engitrace_active_repo_id", "repo-facebook-react");
+
+    const params = new URLSearchParams(window.location.search);
+    const targetUrl = params.get('redirect') || '/ai-assistant';
+    setTimeout(() => {
+      window.location.href = targetUrl;
+    }, 100);
+  </script>
+</body>
+</html>
+

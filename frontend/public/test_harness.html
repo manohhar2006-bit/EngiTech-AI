@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>EngiTrace Investigation Session Harness</title>
+  <style>
+    body, html, iframe {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      overflow: hidden;
+      background: #070A12;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const session1 = {
+      id: "inv-react-dom-01",
+      repositoryId: "repo-facebook-react",
+      repositoryName: "facebook/react",
+      targetNodeId: "file:repo-facebook-react:packages/react-dom/src/client/ReactDOM.js",
+      targetNodeLabel: "ReactDOM.js",
+      targetNodeType: "FILE",
+      targetFilePath: "packages/react-dom/src/client/ReactDOM.js",
+      investigationMode: "WHY",
+      investigationTopic: "Why does ReactDOM.js exist?",
+      messages: [
+        {
+          id: "u-1",
+          role: "user",
+          content: "Why does ReactDOM.js exist?",
+          timestamp: "2026-11-10T22:30:00.000Z"
+        },
+        {
+          id: "a-1",
+          role: "assistant",
+          content: "ReactDOM serves as the primary DOM rendering pipeline entry point for React applications. It initializes the client root container, hydrates server HTML, and coordinates DOM updates.",
+          timestamp: "2026-11-10T22:30:03.000Z",
+          claims: [
+            { text: "Provides client DOM rendering pipeline", classification: "FACT", confidence: 0.98 },
+            { text: "Contains createRoot and hydrateRoot entry points", classification: "FACT", confidence: 0.95 }
+          ],
+          suggestedFollowUps: [
+            "What is createRoot in ReactDOM?",
+            "Which commit introduced createRoot?"
+          ],
+          provider: "GEMINI_CHAT",
+          model: "gemini-3.6-flash"
+        },
+        {
+          id: "u-2",
+          role: "user",
+          content: "What is createRoot in ReactDOM?",
+          timestamp: "2026-11-10T22:31:00.000Z"
+        },
+        {
+          id: "a-2",
+          role: "assistant",
+          content: "createRoot initializes a concurrent mode FiberRoot container, replacing legacy ReactDOM.render and enabling concurrent features like Transitions and Suspense.",
+          timestamp: "2026-11-10T22:31:04.000Z",
+          claims: [
+            { text: "Replaced legacy ReactDOM.render in React 18", classification: "FACT", confidence: 0.97 }
+          ],
+          suggestedFollowUps: [
+            "Which commit introduced createRoot?",
+            "What downstream components depend on ReactDOM.js?"
+          ],
+          provider: "GEMINI_CHAT",
+          model: "gemini-3.6-flash"
+        },
+        {
+          id: "u-3",
+          role: "user",
+          content: "Which commit introduced createRoot?",
+          timestamp: "2026-11-10T22:32:00.000Z"
+        },
+        {
+          id: "a-3",
+          role: "assistant",
+          content: "Commit 4f2c9b1 by Andrew Clark introduced createRoot for concurrent mode root management and discrete event scheduling.",
+          timestamp: "2026-11-10T22:32:04.000Z",
+          claims: [
+            { text: "Authored by Andrew Clark", classification: "FACT", confidence: 0.96 }
+          ],
+          suggestedFollowUps: [
+            "What happens if ReactDOM.js is removed?",
+            "What packages depend on ReactDOM.js?"
+          ],
+          provider: "GEMINI_CHAT",
+          model: "gemini-3.6-flash"
+        }
+      ],
+      suggestedQuestions: [
+        "What happens if ReactDOM.js is removed?",
+        "What packages depend on ReactDOM.js?"
+      ],
+      createdAt: "2026-11-10T22:30:00.000Z",
+      updatedAt: "2026-11-10T22:32:04.000Z",
+      status: "active"
+    };
+
+    const session2 = {
+      id: "inv-payment-02",
+      repositoryId: "repo-payment-gateway",
+      repositoryName: "codeorigin/payment-gateway",
+      targetNodeId: "file:repo-payment-gateway:src/services/PaymentService.ts",
+      targetNodeLabel: "PaymentService.ts",
+      targetNodeType: "FILE",
+      investigationMode: "WHAT_IF",
+      investigationTopic: "What happens if PaymentService.ts is removed?",
+      messages: [
+        {
+          id: "u-p1",
+          role: "user",
+          content: "What happens if PaymentService.ts is removed?",
+          timestamp: "2026-11-10T21:00:00.000Z"
+        },
+        {
+          id: "a-p1",
+          role: "assistant",
+          content: "Impact Level is CRITICAL (Score: 88/100). Removing PaymentService breaks transaction verification and checkout routing.",
+          timestamp: "2026-11-10T21:00:03.000Z",
+          claims: [
+            { text: "Direct dependents: CheckoutController.ts, SubscriptionService.ts", classification: "FACT", confidence: 0.95 }
+          ]
+        }
+      ],
+      createdAt: "2026-11-10T21:00:00.000Z",
+      updatedAt: "2026-11-10T21:00:03.000Z",
+      status: "active"
+    };
+
+    sessionStorage.setItem("engitrace.ai.sessions.v1", JSON.stringify([session1, session2]));
+    sessionStorage.setItem("engitrace.ai.active_session_id.v1", "inv-react-dom-01");
+
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get('page') || '/ai-assistant';
+    const iframe = document.createElement('iframe');
+    iframe.src = target;
+    document.body.appendChild(iframe);
+  </script>
+</body>
+</html>
+

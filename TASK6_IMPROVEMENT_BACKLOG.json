@@ -1,0 +1,205 @@
+{
+  "backlogVersion": "1.0.0",
+  "task": "TASK-6",
+  "generatedAt": "2026-11-21T07:15:00.000Z",
+  "governanceRules": {
+    "disallowUnverifiedClaims": true,
+    "requireBaselineBenchmarkEvidence": "NEEDS_BASELINE",
+    "priorityLevels": ["P0", "P1", "P2", "P3"]
+  },
+  "items": [
+    {
+      "id": "ENGITRACE-T6-001",
+      "priority": "P0",
+      "category": "EVIDENCE_INTEGRITY",
+      "title": "Downgrade FACT claims citing INFERENCE evidence to INFERENCE/UNKNOWN",
+      "problem": "StructuredOutputValidator treats all valid evidence IDs identically, allowing a model claim classified as FACT to be approved even when the underlying evidence is classified as INFERENCE.",
+      "rootCause": "validEvidenceIds Set in StructuredOutputValidator lumped FACT and INFERENCE evidence IDs together without checking classification mapping.",
+      "affectedFiles": [
+        "ai-engine/validators/structuredOutputValidator.ts"
+      ],
+      "proposedSolution": "Maintain distinct factEvidenceIds and inferenceEvidenceIds sets. If a claim claims FACT but only cites INFERENCE evidence IDs, downgrade the claim classification to INFERENCE and log the intervention.",
+      "expectedBenefit": "Guarantees strict epistemological boundary: inferences can never be passed off as confirmed facts.",
+      "possibleRegressionRisk": "Low. Does not affect legitimate FACT claims backed by verified FACT edges.",
+      "automatedTestRequired": "ai-engine/validators/structuredOutputValidator test verifying FACT claim citing INFERENCE evidence is downgraded.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-002",
+      "priority": "P0",
+      "category": "HISTORICAL_INTELLIGENCE",
+      "title": "Enforce repository snapshot cutoff timestamp in WhyExplorerService",
+      "problem": "WhyExplorerService does not check or respect the pinned repository snapshot timestamp, allowing post-snapshot commits and issues to enter the historical reasoning chain.",
+      "rootCause": "WhyExplorerService.executeQuery was unaware of the repository snapshot timestamp and did not filter connected edges or nodes by snapshot cutoff.",
+      "affectedFiles": [
+        "backend/src/services/whyExplorerService.ts"
+      ],
+      "proposedSolution": "Retrieve the repository's pinned snapshot timestamp from RepositoryController. Filter out candidate edges and nodes whose timestamps occur after the snapshot timestamp.",
+      "expectedBenefit": "Prevents post-snapshot violations and ensures strict compliance with pinned benchmark repository states.",
+      "possibleRegressionRisk": "Low. Only excludes events occurring after the pinned snapshot.",
+      "automatedTestRequired": "Test verifying that post-snapshot events are excluded from the historical reasoning chain.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-003",
+      "priority": "P1",
+      "category": "GRAPH_REASONING",
+      "title": "Prioritize historical chain traversal in GraphQueryEngine.getHistoricalChain",
+      "problem": "GraphQueryEngine.getHistoricalChain states in documentation that it walks File -> Commit -> PR -> Issue, but implementation used edges.find() taking the first connected edge regardless of type.",
+      "rootCause": "Missing relationship and node type priority sorting in getHistoricalChain.",
+      "affectedFiles": [
+        "graph-engine/src/index.ts"
+      ],
+      "proposedSolution": "Sort and filter candidate edges prioritizing MODIFIED/CHANGED -> IMPLEMENTED/MERGED -> RESOLVES/REFERENCES, and target node types COMMIT -> PULL_REQUEST -> ISSUE.",
+      "expectedBenefit": "Produces predictable, canonical historical reasoning chains rather than jumping to unrelated nodes.",
+      "possibleRegressionRisk": "Low. Conforms to the original documented architectural design.",
+      "automatedTestRequired": "Regression test verifying canonical chain traversal across mixed edge types.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-004",
+      "priority": "P1",
+      "category": "IMPACT_ANALYSIS",
+      "title": "Fix relationship direction for EXPOSES in ImpactAnalysisService",
+      "problem": "When analyzing impact of removing a file, functions or components exported by that file via EXPOSES edges are omitted from affected components because EXPOSES was evaluated under currentFrontier.has(edge.target).",
+      "rootCause": "RelationshipRegistry defines EXPOSES as File -> Function/Component. ImpactAnalysisService failed to include EXPOSES in the forward container branch (relType === 'CONTAINS' || relType === 'DECLARES').",
+      "affectedFiles": [
+        "backend/src/services/impactAnalysisService.ts"
+      ],
+      "proposedSolution": "Add 'EXPOSES' to the forward container relationship check: (relType === 'CONTAINS' || relType === 'DECLARES' || relType === 'EXPOSES') when currentFrontier contains the source node.",
+      "expectedBenefit": "Accurate blast radius calculation: removing a source file accurately marks its exposed functions/components as affected.",
+      "possibleRegressionRisk": "Low. Directly aligns with RelationshipRegistry semantics.",
+      "automatedTestRequired": "Test verifying file with EXPOSES edge propagates impact to exposed functions.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-005",
+      "priority": "P1",
+      "category": "EVIDENCE_GROUNDING",
+      "title": "Fix repositoryId placeholder in WhyExplorerService evidence records",
+      "problem": "WhyExplorerService sets evidence.repositoryId to targetNode.id (e.g. file:EEID-REPO-001:lib/app.js) instead of the canonical repository ID, requiring hacky workarounds in ChatController.",
+      "rootCause": "categorizeEvidence in WhyExplorerService used targetNode.id for evidence.repositoryId.",
+      "affectedFiles": [
+        "backend/src/services/whyExplorerService.ts"
+      ],
+      "proposedSolution": "Pass canonical repository ID into categorizeEvidence and assign evidence.repositoryId = repositoryId.",
+      "expectedBenefit": "Clean, consistent evidence records adhering to repository isolation without downstream patching.",
+      "possibleRegressionRisk": "Very low. Preserves canonical repository IDs.",
+      "automatedTestRequired": "Test verifying all generated evidence records carry the repository ID.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-006",
+      "priority": "P1",
+      "category": "RETRIEVAL_INTELLIGENCE",
+      "title": "Support function and component node IDs in cleanNodeFilePath",
+      "problem": "cleanNodeFilePath only stripped 'file:' prefixes, failing when queried with function or component node IDs like 'function:EEID-REPO-001:lib/application.js:app.listen:60'.",
+      "rootCause": "cleanNodeFilePath regex only handled /^file:[^:]+:/ and did not handle other node types or trailing symbol/line specifiers.",
+      "affectedFiles": [
+        "backend/src/controllers/chatController.ts"
+      ],
+      "proposedSolution": "Enhance cleanNodeFilePath to recognize function: and component: prefixes, stripping repository and trailing symbol/line segments to extract the valid file path.",
+      "expectedBenefit": "Enables retrieval of underlying source files when users or benchmark questions target function or component nodes.",
+      "possibleRegressionRisk": "Very low. Strictly additive path normalization.",
+      "automatedTestRequired": "Test verifying source file retrieval for function node IDs.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-007",
+      "priority": "P1",
+      "category": "RETRIEVAL_INTELLIGENCE",
+      "title": "Enforce exact repository matching precedence in repositoryController",
+      "problem": "Substring includes matching in getSnapshot could prematurely match non-identical repository IDs (e.g., repo-1 matching repo-10).",
+      "rootCause": "snap.metadata.id.toLowerCase().includes(cleanId) was executed in the same pass as alias matching.",
+      "affectedFiles": [
+        "backend/src/controllers/repositoryController.ts"
+      ],
+      "proposedSolution": "Perform exact key/id/alias matching in pass 1. Only evaluate substring match in pass 2 with segment boundary checks.",
+      "expectedBenefit": "Zero repository confusion in multi-repository runtime environments.",
+      "possibleRegressionRisk": "Zero.",
+      "automatedTestRequired": "Test with ambiguous repository slugs.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-008",
+      "priority": "P2",
+      "category": "RELIABILITY",
+      "title": "Add request timeout to Gemini API fetch calls in ProviderService",
+      "problem": "fetch calls to Generative Language REST API in ProviderService lacked an AbortController, creating risk of indefinite blocking during network degradation.",
+      "rootCause": "Missing AbortController signal on fetch calls.",
+      "affectedFiles": [
+        "ai-engine/services/providerService.ts"
+      ],
+      "proposedSolution": "Add an AbortController with configurable timeout (default 30,000ms), catching timeouts and cleanly falling back to local fallback.",
+      "expectedBenefit": "Guarantees responsive server behavior even under provider network outages.",
+      "possibleRegressionRisk": "Very low.",
+      "automatedTestRequired": "Test validating timeout interception and fallback invocation.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-009",
+      "priority": "P2",
+      "category": "SECURITY",
+      "title": "Redact secrets in ChatController error response details",
+      "problem": "ChatController catch block returned raw err?.message in details field without passing through redactSecrets.",
+      "rootCause": "Unsanitized error details in 500 response payload.",
+      "affectedFiles": [
+        "backend/src/controllers/chatController.ts"
+      ],
+      "proposedSolution": "Wrap err?.message with redactSecrets before serializing into JSON response.",
+      "expectedBenefit": "Prevents accidental leakage of API keys, URLs, or internal paths in HTTP error responses.",
+      "possibleRegressionRisk": "Zero.",
+      "automatedTestRequired": "Test verifying that API tokens in error strings are redacted.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-010",
+      "priority": "P2",
+      "category": "GRAPH_REASONING",
+      "title": "Add directed path traversal option to GraphQueryEngine.findPath",
+      "problem": "findPath only supported undirected search, which can traverse backwards against directed dependencies.",
+      "rootCause": "Adjacency list added forward and reverse edges unconditionally.",
+      "affectedFiles": [
+        "graph-engine/src/index.ts"
+      ],
+      "proposedSolution": "Add optional options: { directed?: boolean } parameter (defaulting to false for full backward compatibility).",
+      "expectedBenefit": "Enables strict caller-to-callee dependency path verification.",
+      "possibleRegressionRisk": "Zero (backward compatible default).",
+      "automatedTestRequired": "Test comparing directed vs undirected path results on asymmetric graphs.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    },
+    {
+      "id": "ENGITRACE-T6-011",
+      "priority": "P2",
+      "category": "REASONING_QUALITY",
+      "title": "Version prompts and provide feature flag for pre-Task-6 baseline preservation",
+      "problem": "Prompt strings were hardcoded in providerService.ts with no version identifier or flag to toggle between pre-Task-6 and enhanced versions.",
+      "rootCause": "Absence of prompt versioning architecture in conversational chat pipeline.",
+      "affectedFiles": [
+        "ai-engine/services/providerService.ts",
+        "ai-engine/prompts/chatPrompts.ts"
+      ],
+      "proposedSolution": "Create versioned prompt definitions: chat.v1 (exact pre-Task-6 prompt) and chat.v2 (Task 6 enhanced grounding prompt). Control via ENGITRACE_PROMPT_VERSION environment variable.",
+      "expectedBenefit": "Preserves exact pre-Task-6 prompt for baseline evaluation while enabling versioned improvements.",
+      "possibleRegressionRisk": "Zero (feature flag allows instantaneous rollback).",
+      "automatedTestRequired": "Test verifying prompt switching between v1 and v2.",
+      "benchmarkEvidenceStatus": "NEEDS_BASELINE"
+    },
+    {
+      "id": "ENGITRACE-T6-012",
+      "priority": "P2",
+      "category": "CITATION_QUALITY",
+      "title": "Expose explicit startLine and endLineExclusive in source line ranges",
+      "problem": "lineRange in MultiFileContext only declared startLine and endLine without clarifying inclusive vs exclusive end line.",
+      "rootCause": "Omission of explicit half-open interval field name.",
+      "affectedFiles": [
+        "backend/src/services/multiFileContextService.ts"
+      ],
+      "proposedSolution": "Expose both startLine (1-based inclusive) and endLineExclusive (1-based exclusive) alongside legacy endLine.",
+      "expectedBenefit": "Unambiguous conformance to EEID 1-based start-inclusive end-exclusive source anchor convention.",
+      "possibleRegressionRisk": "Zero (preserves legacy fields).",
+      "automatedTestRequired": "Test verifying source interval values adhere to half-open convention.",
+      "benchmarkEvidenceStatus": "VERIFIED_VIA_DETERMINISTIC_TESTS"
+    }
+  ]
+}

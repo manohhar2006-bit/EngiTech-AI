@@ -1,0 +1,97 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules/
+
+# Build & test outputs
+dist/
+dist-ssr/
+build/
+coverage/
+.next/
+.out/
+
+# Environment and Secret Files (Strictly Excluded)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production
+.env.production.local
+.env*
+!.env.example
+*.local
+
+# Editor and OS directories
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
+
+# Python bytecode & venv
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Antigravity / IDE temp files
+.gemini/
+
+# Scratch & temporary workspace directories
+scratch/
+audit_workspace/
+evaluation_runs/
+pilot-output/
+EEID_Pilot_Starter_Bundle/
+EngiTrace_EEID_Starter_Files/
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# EEID Dataset & Audit Exclusions (Per EEID Publication Policy)
+eeid/annotation_queue/
+eeid/pilot-output/
+eeid/task3-audit-input/
+eeid/task3-remediation-proposal/
+eeid/task3-remediation-proposal-*/
+eeid/task6/pre-task6-source-snapshot/
+eeid/task7/
+eeid/task7-final-execution/
+eeid/eeid_records.jsonl
+eeid/candidate_questions.jsonl
+eeid/annotation_review.jsonl
+eeid/pilot_sample_records.jsonl
+eeid/eeid_pilot_repositories.jsonl
+
+# Internal Directory Audits, Checksum Manifests & Prechange Snapshots
+DIRECTORY_*
+EEID_DATA_INTEGRITY_REPORT.md
+EEID_DIRECTORY_AUDIT_REPORT.md
+EEID_HISTORICAL_AUDIT_CORRECTION_ADDENDUM.md
+EEID_RECONCILED_INVENTORY.json
+SCRATCH_DIRECTORY_AUDIT_REPORT.md
+GRAPH_INTEGRITY_REPORT.md
+PROJECT_REFERENCE_AUDIT.md
+TASK6_PRECHANGE_SNAPSHOT_MANIFEST.json
+SHA256SUMS.txt
